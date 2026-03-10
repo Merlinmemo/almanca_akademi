@@ -1,0 +1,12 @@
+{
+  "examples": [
+    {"theme":"modul1","de":"Ich lerne Deutsch.","tr":"Ben Almanca öğreniyorum."},
+    {"theme":"modul1","de":"Du sprichst Türkisch.","tr":"Sen Türkçe konuşuyorsun."},
+    {"theme":"modul2","de":"Ich brauche Hilfe.","tr":"Yardıma ihtiyacım var."},
+    {"theme":"modul2","de":"Wir haben Zeit.","tr":"Bizim vaktimiz var."},
+    {"theme":"modul4","de":"Ich möchte Brot, bitte.","tr":"Ekmek istiyorum, lütfen."},
+    {"theme":"modul4","de":"Du brauchst Wasser.","tr":"Sen suya ihtiyaç duyuyorsun."},
+    {"theme":"modul5","de":"Ich gehe zur Apotheke.","tr":"Eczaneye gidiyorum."},
+    {"theme":"modul8","de":"Wir suchen Arbeit.","tr":"Biz iş arıyoruz."}
+  ]
+}

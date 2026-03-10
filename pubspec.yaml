@@ -1,0 +1,33 @@
+name: almanca_ogreniyorum
+description: Almanca Akademi Uygulaması
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  http: ^1.2.1
+  path_provider: ^2.1.3
+  just_audio: ^0.9.46
+  crypto: ^3.0.3
+  shared_preferences: ^2.2.3
+  speech_to_text: ^7.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/ui/
+    - assets/data/words_basic_a1.json
+    - assets/data/sentences_a1.json
+    - assets/data/sprechen/

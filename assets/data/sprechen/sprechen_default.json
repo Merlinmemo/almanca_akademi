@@ -1,0 +1,460 @@
+[
+  {
+    "title": "Vorstellung",
+    "exampleDe": "Ich heiße Mehmet.",
+    "exampleTr": "Benim adım Mehmet.",
+    "microRuleTitle": "heißen",
+    "microRuleText": "Ad söylemek için: Ich heiße ...",
+    "practiceOptions": ["Ich heiße Mehmet.", "Ich bin heiße Mehmet.", "Ich heißt Mehmet."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Vorstellung",
+    "exampleDe": "Mein Name ist Mehmet.",
+    "exampleTr": "Benim adım Mehmet.",
+    "microRuleTitle": "Mein Name ist",
+    "microRuleText": "Alternatif tanıtım: Mein Name ist ...",
+    "practiceOptions": ["Mein Name ist Mehmet.", "Mein Name bin Mehmet.", "Meine Name ist Mehmet."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Herkunft",
+    "exampleDe": "Ich komme aus der Türkei.",
+    "exampleTr": "Ben Türkiye'den geliyorum.",
+    "microRuleTitle": "aus + Dativ",
+    "microRuleText": "Ülke/şehir çıkış bildirirken 'aus' kullanılır.",
+    "practiceOptions": ["Ich komme aus der Türkei.", "Ich komme von der Türkei.", "Ich komme in der Türkei."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Herkunft",
+    "exampleDe": "Ich komme aus Izmir.",
+    "exampleTr": "Ben İzmir'den geliyorum.",
+    "microRuleTitle": "aus + Stadt",
+    "microRuleText": "Şehir çıkışı: aus Berlin, aus Izmir.",
+    "practiceOptions": ["Ich komme aus Izmir.", "Ich komme in Izmir.", "Ich komme von Izmir."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Wohnort",
+    "exampleDe": "Ich wohne in Köln.",
+    "exampleTr": "Ben Köln'de yaşıyorum.",
+    "microRuleTitle": "in + Stadt",
+    "microRuleText": "Şehirlerle genelde 'in' kullanılır.",
+    "practiceOptions": ["Ich wohne in Köln.", "Ich wohne auf Köln.", "Ich wohnen in Köln."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Wohnort",
+    "exampleDe": "Ich wohne in Deutschland.",
+    "exampleTr": "Ben Almanya'da yaşıyorum.",
+    "microRuleTitle": "in + Land",
+    "microRuleText": "Ülke için de 'in' sık kullanılır: in Deutschland.",
+    "practiceOptions": ["Ich wohne in Deutschland.", "Ich wohne aus Deutschland.", "Ich wohnen in Deutschland."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Alter",
+    "exampleDe": "Ich bin 30 Jahre alt.",
+    "exampleTr": "30 yaşındayım.",
+    "microRuleTitle": "Jahre alt",
+    "microRuleText": "Yaş: Ich bin ... Jahre alt.",
+    "practiceOptions": ["Ich bin 30 Jahre alt.", "Ich habe 30 Jahre.", "Ich bin 30 alt Jahre."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Beruf",
+    "exampleDe": "Ich arbeite als Elektriker.",
+    "exampleTr": "Elektrikçi olarak çalışıyorum.",
+    "microRuleTitle": "als + Beruf",
+    "microRuleText": "Meslek bildirirken 'als'.",
+    "practiceOptions": ["Ich arbeite als Elektriker.", "Ich arbeite wie Elektriker.", "Ich bin arbeite Elektriker."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Beruf",
+    "exampleDe": "Ich bin Elektriker.",
+    "exampleTr": "Ben elektrikçiyim.",
+    "microRuleTitle": "sein",
+    "microRuleText": "Meslek kısa ifade: Ich bin ...",
+    "practiceOptions": ["Ich bin Elektriker.", "Ich habe Elektriker.", "Ich bist Elektriker."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Sprachen",
+    "exampleDe": "Ich lerne Deutsch.",
+    "exampleTr": "Almanca öğreniyorum.",
+    "microRuleTitle": "lernen",
+    "microRuleText": "Öğrenmek: lernen.",
+    "practiceOptions": ["Ich lerne Deutsch.", "Ich lernen Deutsch.", "Ich lerne Deutsche."],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Begrüßung",
+    "exampleDe": "Guten Morgen!",
+    "exampleTr": "Günaydın!",
+    "microRuleTitle": "Gruß",
+    "microRuleText": "Sabah selamı: Guten Morgen!",
+    "practiceOptions": ["Guten Morgen!", "Gute Morgen!", "Guten Morgens!"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Begrüßung",
+    "exampleDe": "Guten Tag!",
+    "exampleTr": "İyi günler!",
+    "microRuleTitle": "Gruß",
+    "microRuleText": "Gün içinde: Guten Tag!",
+    "practiceOptions": ["Guten Tag!", "Gute Tag!", "Guten Tage!"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Begrüßung",
+    "exampleDe": "Guten Abend!",
+    "exampleTr": "İyi akşamlar!",
+    "microRuleTitle": "Gruß",
+    "microRuleText": "Akşam selamı: Guten Abend!",
+    "practiceOptions": ["Guten Abend!", "Gute Abend!", "Guten Abends!"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Abschied",
+    "exampleDe": "Tschüss!",
+    "exampleTr": "Hoşça kal!",
+    "microRuleTitle": "Abschied",
+    "microRuleText": "Günlük vedalaşma: Tschüss!",
+    "practiceOptions": ["Tschüss!", "Tschus!", "Tschüss."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Abschied",
+    "exampleDe": "Auf Wiedersehen!",
+    "exampleTr": "Görüşürüz!",
+    "microRuleTitle": "Abschied",
+    "microRuleText": "Daha resmi vedalaşma: Auf Wiedersehen!",
+    "practiceOptions": ["Auf Wiedersehen!", "Auf Wiedersehn!", "Auf Wieder sehen!"],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Fragen",
+    "exampleDe": "Wie heißt du?",
+    "exampleTr": "Adın ne?",
+    "microRuleTitle": "Wie heißt...?",
+    "microRuleText": "İsim sorma: Wie heißt du?",
+    "practiceOptions": ["Wie heißt du?", "Wie heiße du?", "Was heißt du?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Fragen",
+    "exampleDe": "Wo wohnst du?",
+    "exampleTr": "Nerede yaşıyorsun?",
+    "microRuleTitle": "Wo + Verb",
+    "microRuleText": "Yer sorma: Wo wohnst du?",
+    "practiceOptions": ["Wo wohnst du?", "Wo wohn du?", "Wo wohnst dir?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Fragen",
+    "exampleDe": "Woher kommst du?",
+    "exampleTr": "Nerelisin?",
+    "microRuleTitle": "Woher",
+    "microRuleText": "Köken sorma: Woher kommst du?",
+    "practiceOptions": ["Woher kommst du?", "Wohin kommst du?", "Woher komm du?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Fragen",
+    "exampleDe": "Wie alt bist du?",
+    "exampleTr": "Kaç yaşındasın?",
+    "microRuleTitle": "Wie alt",
+    "microRuleText": "Yaş sorma: Wie alt bist du?",
+    "practiceOptions": ["Wie alt bist du?", "Wie alt du bist?", "Wie bist alt du?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Fragen",
+    "exampleDe": "Was machst du beruflich?",
+    "exampleTr": "Mesleğin ne?",
+    "microRuleTitle": "beruflich",
+    "microRuleText": "Meslek sorma: Was machst du beruflich?",
+    "practiceOptions": ["Was machst du beruflich?", "Was machst du Beruf?", "Was beruflich machst du?"],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Antwort",
+    "exampleDe": "Ich heiße Cano.",
+    "exampleTr": "Benim adım Cano.",
+    "microRuleTitle": "Ich heiße",
+    "microRuleText": "Cevap: Ich heiße ...",
+    "practiceOptions": ["Ich heiße Cano.", "Ich heißt Cano.", "Ich bin heiße Cano."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Antwort",
+    "exampleDe": "Ich wohne in Izmir.",
+    "exampleTr": "İzmir'de yaşıyorum.",
+    "microRuleTitle": "in + Stadt",
+    "microRuleText": "Şehir: in Izmir.",
+    "practiceOptions": ["Ich wohne in Izmir.", "Ich wohne auf Izmir.", "Ich wohnen in Izmir."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Antwort",
+    "exampleDe": "Ich komme aus Izmir.",
+    "exampleTr": "İzmir'den geliyorum.",
+    "microRuleTitle": "aus",
+    "microRuleText": "Çıkış/köken: aus Izmir.",
+    "practiceOptions": ["Ich komme aus Izmir.", "Ich komme in Izmir.", "Ich komme von Izmir."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Antwort",
+    "exampleDe": "Ich bin Elektriker von Beruf.",
+    "exampleTr": "Mesleğim elektrikçilik.",
+    "microRuleTitle": "von Beruf",
+    "microRuleText": "Meslek: ... von Beruf.",
+    "practiceOptions": ["Ich bin Elektriker von Beruf.", "Ich bin Elektriker vom Beruf.", "Ich bin von Beruf Elektriker."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Antwort",
+    "exampleDe": "Ich arbeite in einer Firma.",
+    "exampleTr": "Bir firmada çalışıyorum.",
+    "microRuleTitle": "in + Dativ",
+    "microRuleText": "Yer bildirirken: in einer Firma.",
+    "practiceOptions": ["Ich arbeite in einer Firma.", "Ich arbeite in ein Firma.", "Ich arbeite auf einer Firma."],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Alltag",
+    "exampleDe": "Ich trinke gern Tee.",
+    "exampleTr": "Çay içmeyi severim.",
+    "microRuleTitle": "gern",
+    "microRuleText": "Sevme: gern.",
+    "practiceOptions": ["Ich trinke gern Tee.", "Ich trinke gerne Tee.", "Ich gern trinke Tee."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Alltag",
+    "exampleDe": "Ich esse gern Brot.",
+    "exampleTr": "Ekmek yemeyi severim.",
+    "microRuleTitle": "gern",
+    "microRuleText": "Sevme: gern.",
+    "practiceOptions": ["Ich esse gern Brot.", "Ich esse gern Brote.", "Ich gern esse Brot."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Alltag",
+    "exampleDe": "Ich gehe heute arbeiten.",
+    "exampleTr": "Bugün işe gidiyorum.",
+    "microRuleTitle": "heute",
+    "microRuleText": "Bugün: heute.",
+    "practiceOptions": ["Ich gehe heute arbeiten.", "Ich gehe arbeiten heute.", "Ich gehe heute zur arbeiten."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Alltag",
+    "exampleDe": "Ich habe heute Zeit.",
+    "exampleTr": "Bugün vaktim var.",
+    "microRuleTitle": "Zeit",
+    "microRuleText": "Zaman: Zeit.",
+    "practiceOptions": ["Ich habe heute Zeit.", "Ich bin heute Zeit.", "Ich habe Zeit heute."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Alltag",
+    "exampleDe": "Ich habe keine Zeit.",
+    "exampleTr": "Vaktim yok.",
+    "microRuleTitle": "keine",
+    "microRuleText": "Olumsuz: keine Zeit.",
+    "practiceOptions": ["Ich habe keine Zeit.", "Ich habe nicht Zeit.", "Ich bin keine Zeit."],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Einkaufen",
+    "exampleDe": "Ich möchte Wasser, bitte.",
+    "exampleTr": "Su istiyorum, lütfen.",
+    "microRuleTitle": "bitte",
+    "microRuleText": "Kibar istek: bitte.",
+    "practiceOptions": ["Ich möchte Wasser, bitte.", "Ich möchte Wasser bitte.", "Ich will Wasser, bitte."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Einkaufen",
+    "exampleDe": "Was kostet das?",
+    "exampleTr": "Bu ne kadar?",
+    "microRuleTitle": "kosten",
+    "microRuleText": "Fiyat sorma: Was kostet das?",
+    "practiceOptions": ["Was kostet das?", "Was kostet der?", "Wie kostet das?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Einkaufen",
+    "exampleDe": "Ich nehme das.",
+    "exampleTr": "Bunu alıyorum.",
+    "microRuleTitle": "nehmen",
+    "microRuleText": "Seçmek/almak: Ich nehme das.",
+    "practiceOptions": ["Ich nehme das.", "Ich nimm das.", "Ich nehme der."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Einkaufen",
+    "exampleDe": "Ich brauche eine Tüte.",
+    "exampleTr": "Poşete ihtiyacım var.",
+    "microRuleTitle": "brauchen",
+    "microRuleText": "İhtiyaç: brauchen.",
+    "practiceOptions": ["Ich brauche eine Tüte.", "Ich brauche ein Tüte.", "Ich bin brauche Tüte."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Einkaufen",
+    "exampleDe": "Haben Sie Brot?",
+    "exampleTr": "Ekmek var mı?",
+    "microRuleTitle": "Haben Sie...?",
+    "microRuleText": "Resmi soru: Haben Sie ...?",
+    "practiceOptions": ["Haben Sie Brot?", "Hast Sie Brot?", "Haben du Brot?"],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Restaurant",
+    "exampleDe": "Ich hätte gern einen Kaffee.",
+    "exampleTr": "Bir kahve alabilir miyim (nazik).",
+    "microRuleTitle": "hätte gern",
+    "microRuleText": "Daha nazik istek: Ich hätte gern ...",
+    "practiceOptions": ["Ich hätte gern einen Kaffee.", "Ich habe gern einen Kaffee.", "Ich hätte gerne ein Kaffee."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Restaurant",
+    "exampleDe": "Die Rechnung, bitte.",
+    "exampleTr": "Hesap lütfen.",
+    "microRuleTitle": "Rechnung",
+    "microRuleText": "Hesap: die Rechnung.",
+    "practiceOptions": ["Die Rechnung, bitte.", "Der Rechnung, bitte.", "Die Rechung, bitte."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Restaurant",
+    "exampleDe": "Ich möchte zahlen.",
+    "exampleTr": "Ödemek istiyorum.",
+    "microRuleTitle": "zahlen",
+    "microRuleText": "Ödemek: zahlen.",
+    "practiceOptions": ["Ich möchte zahlen.", "Ich möchte bezahle.", "Ich will zahlen."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Restaurant",
+    "exampleDe": "Ich bin vegetarisch.",
+    "exampleTr": "Ben vejetaryenim.",
+    "microRuleTitle": "Adjektiv",
+    "microRuleText": "Özellik: Ich bin ...",
+    "practiceOptions": ["Ich bin vegetarisch.", "Ich habe vegetarisch.", "Ich bin Vegetarierisch."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Restaurant",
+    "exampleDe": "Haben Sie eine Speisekarte?",
+    "exampleTr": "Menünüz var mı?",
+    "microRuleTitle": "Speisekarte",
+    "microRuleText": "Menü: die Speisekarte.",
+    "practiceOptions": ["Haben Sie eine Speisekarte?", "Haben Sie ein Speisekarte?", "Hast du eine Speisekarte?"],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Weg",
+    "exampleDe": "Wo ist der Bahnhof?",
+    "exampleTr": "Tren istasyonu nerede?",
+    "microRuleTitle": "Wo ist...?",
+    "microRuleText": "Yer sorma: Wo ist ...?",
+    "practiceOptions": ["Wo ist der Bahnhof?", "Wo sind der Bahnhof?", "Wo ist die Bahnhof?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Weg",
+    "exampleDe": "Ich suche die Straße.",
+    "exampleTr": "Sokağı arıyorum.",
+    "microRuleTitle": "suchen",
+    "microRuleText": "Aramak: suchen.",
+    "practiceOptions": ["Ich suche die Straße.", "Ich suche der Straße.", "Ich bin suche Straße."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Weg",
+    "exampleDe": "Können Sie mir helfen?",
+    "exampleTr": "Bana yardım edebilir misiniz?",
+    "microRuleTitle": "können",
+    "microRuleText": "Rica: Können Sie...?",
+    "practiceOptions": ["Können Sie mir helfen?", "Können du mir helfen?", "Kannst Sie mir helfen?"],
+    "correctIndex": 0
+  },
+  {
+    "title": "Weg",
+    "exampleDe": "Ich gehe nach Hause.",
+    "exampleTr": "Eve gidiyorum.",
+    "microRuleTitle": "nach Hause",
+    "microRuleText": "Eve gitmek: nach Hause.",
+    "practiceOptions": ["Ich gehe nach Hause.", "Ich gehe zu Hause.", "Ich gehe nach den Hause."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Weg",
+    "exampleDe": "Ich fahre mit dem Bus.",
+    "exampleTr": "Otobüsle gidiyorum.",
+    "microRuleTitle": "mit + Dativ",
+    "microRuleText": "Araç: mit dem Bus.",
+    "practiceOptions": ["Ich fahre mit dem Bus.", "Ich fahre mit der Bus.", "Ich fahre in dem Bus."],
+    "correctIndex": 0
+  },
+
+  {
+    "title": "Termin",
+    "exampleDe": "Ich habe morgen einen Termin.",
+    "exampleTr": "Yarın randevum var.",
+    "microRuleTitle": "morgen",
+    "microRuleText": "Yarın: morgen.",
+    "practiceOptions": ["Ich habe morgen einen Termin.", "Ich habe morgen ein Termin.", "Ich bin morgen einen Termin."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Termin",
+    "exampleDe": "Ich brauche einen Termin beim Arzt.",
+    "exampleTr": "Doktordan randevuya ihtiyacım var.",
+    "microRuleTitle": "bei + Dativ",
+    "microRuleText": "Kişi/kurum yanında: beim Arzt.",
+    "practiceOptions": ["Ich brauche einen Termin beim Arzt.", "Ich brauche Termin bei Arzt.", "Ich brauche einen Termin bei der Arzt."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Telefon",
+    "exampleDe": "Ich rufe später an.",
+    "exampleTr": "Sonra arayacağım.",
+    "microRuleTitle": "anrufen",
+    "microRuleText": "Aramak: anrufen / rufe ... an.",
+    "practiceOptions": ["Ich rufe später an.", "Ich rufe an später.", "Ich anrufe später."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Zeit",
+    "exampleDe": "Heute ist Montag.",
+    "exampleTr": "Bugün Pazartesi.",
+    "microRuleTitle": "Wochentag",
+    "microRuleText": "Gün söyleme: Heute ist ...",
+    "practiceOptions": ["Heute ist Montag.", "Heute Montag ist.", "Heute ist der Montag."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Wetter",
+    "exampleDe": "Es ist heute kalt.",
+    "exampleTr": "Bugün hava soğuk.",
+    "microRuleTitle": "Es ist ...",
+    "microRuleText": "Hava durumu: Es ist kalt/warm.",
+    "practiceOptions": ["Es ist heute kalt.", "Er ist heute kalt.", "Es ist kalt heute."],
+    "correctIndex": 0
+  }
+]

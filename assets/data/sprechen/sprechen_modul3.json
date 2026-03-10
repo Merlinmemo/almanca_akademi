@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Wohnen",
+    "exampleDe": "Ich wohne in Köln.",
+    "exampleTr": "Ben Köln'de yaşıyorum.",
+    "microRuleTitle": "in + Stadt",
+    "microRuleText": "Şehirlerle genelde 'in' kullanılır: in Berlin, in Köln.",
+    "practiceOptions": ["Ich wohne in Köln.", "Ich wohne auf Köln.", "Ich wohnen in Köln."],
+    "correctIndex": 0
+  },
+  {
+    "title": "Vorstellen",
+    "exampleDe": "Ich heiße Mehmet.",
+    "exampleTr": "Benim adım Mehmet.",
+    "microRuleTitle": "heißen",
+    "microRuleText": "Ad söylemek için: Ich heiße ...",
+    "practiceOptions": ["Ich heiße Mehmet.", "Ich bin heiße Mehmet.", "Ich heißt Mehmet."],
+    "correctIndex": 0
+  }
+]
