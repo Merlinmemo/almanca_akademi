@@ -14,8 +14,10 @@ class ProgressService {
   static String _kModuleUnlocked(String code) => "${code}_unlocked";
   static String _kModuleCompleted(String code) => "${code}_completed";
   static String _kModuleProgress(String code) => "${code}_progress"; // 0-100
-  static String _kSectionCompleted(String code, String section) => "${code}_section_$section";
-  static String _kModuleCompletedDate(String code) => "${code}_completed_date"; // yyyy-mm-dd
+  static String _kSectionCompleted(String code, String section) =>
+      "${code}_section_$section";
+  static String _kModuleCompletedDate(String code) =>
+      "${code}_completed_date"; // yyyy-mm-dd
 
   // Streak
   static const _kStreak = "streak";
@@ -26,7 +28,8 @@ class ProgressService {
   static String _kDoneMinutesYmd(String ymd) => "doneMinutes_$ymd";
 
   // Study log
-  static const _kLastStudyLog = "lastStudyLog"; // "2026-02-24 • Bölüm tamamlandı (+10dk)"
+  static const _kLastStudyLog =
+      "lastStudyLog"; // "2026-02-24 • Bölüm tamamlandı (+10dk)"
 
   // Resume / Last Position
   static const _kLastPosModule = "lastPosModule";
@@ -88,7 +91,8 @@ class ProgressService {
   // CORE
   // ------------------------------------------------------------
 
-  Future<int> getTotalProgress() async => (await _prefs).getInt(_kTotalProgress) ?? 0;
+  Future<int> getTotalProgress() async =>
+      (await _prefs).getInt(_kTotalProgress) ?? 0;
 
   Future<void> _setTotalProgress(int value) async =>
       (await _prefs).setInt(_kTotalProgress, value.clamp(0, 100));
@@ -146,7 +150,11 @@ class ProgressService {
   Future<bool> isSectionCompleted(String code, String sectionKey) async =>
       (await _prefs).getBool(_kSectionCompleted(code, sectionKey)) ?? false;
 
-  Future<void> setSectionCompleted(String code, String sectionKey, bool v) async =>
+  Future<void> setSectionCompleted(
+    String code,
+    String sectionKey,
+    bool v,
+  ) async =>
       (await _prefs).setBool(_kSectionCompleted(code, sectionKey), v);
 
   // ------------------------------------------------------------
@@ -253,7 +261,8 @@ class ProgressService {
     return done;
   }
 
-  Future<bool> isDailyMissionCompleted() async => (await getDailyCompletedCount()) >= 4;
+  Future<bool> isDailyMissionCompleted() async =>
+      (await getDailyCompletedCount()) >= 4;
 
   Future<Map<String, dynamic>> getDailyMissionSnapshot() async {
     final progress = await getDailyProgress();
@@ -296,7 +305,10 @@ class ProgressService {
         (progress['quiz'] ?? 0).clamp(0, goals['quiz'] ?? 0);
 
     const totalGoal =
-        _kDailyGoalVocab + _kDailyGoalListening + _kDailyGoalSpeaking + _kDailyGoalQuiz;
+        _kDailyGoalVocab +
+        _kDailyGoalListening +
+        _kDailyGoalSpeaking +
+        _kDailyGoalQuiz;
 
     return totalDone / totalGoal;
   }
@@ -318,7 +330,10 @@ class ProgressService {
 
   Future<void> markDailyListeningDone({int count = 1}) async {
     for (int i = 0; i < count; i++) {
-      await _incrementDailyKey(_kDailyListeningDone, max: _kDailyGoalListening);
+      await _incrementDailyKey(
+        _kDailyListeningDone,
+        max: _kDailyGoalListening,
+      );
     }
     await markStudyToday();
   }
@@ -432,7 +447,9 @@ class ProgressService {
     }
 
     final meta = await _getWrongWordMetaMap();
-    final current = (meta[clean] is Map) ? Map<String, dynamic>.from(meta[clean] as Map) : <String, dynamic>{};
+    final current = (meta[clean] is Map)
+        ? Map<String, dynamic>.from(meta[clean] as Map)
+        : <String, dynamic>{};
     final wrongCount = ((current['wrongCount'] as int?) ?? 0) + 1;
     final nextReview = now.add(_reviewDelayForWrongCount(wrongCount));
 
@@ -457,12 +474,17 @@ class ProgressService {
     await _saveWrongWordMetaMap(meta);
   }
 
-  Future<void> postponeWrongWord(String word, {Duration delay = const Duration(days: 1)}) async {
+  Future<void> postponeWrongWord(
+    String word, {
+    Duration delay = const Duration(days: 1),
+  }) async {
     final clean = word.trim();
     if (clean.isEmpty) return;
 
     final meta = await _getWrongWordMetaMap();
-    final current = (meta[clean] is Map) ? Map<String, dynamic>.from(meta[clean] as Map) : <String, dynamic>{};
+    final current = (meta[clean] is Map)
+        ? Map<String, dynamic>.from(meta[clean] as Map)
+        : <String, dynamic>{};
     final now = DateTime.now();
     final wrongCount = (current['wrongCount'] as int?) ?? 1;
 
@@ -515,9 +537,11 @@ class ProgressService {
   // STUDY PLAN
   // ------------------------------------------------------------
 
-  Future<int> getDailyTargetMinutes() async => (await _prefs).getInt(_kDailyTargetMinutes) ?? 15;
+  Future<int> getDailyTargetMinutes() async =>
+      (await _prefs).getInt(_kDailyTargetMinutes) ?? 15;
 
-  Future<void> setDailyTargetMinutes(int v) async => (await _prefs).setInt(_kDailyTargetMinutes, v);
+  Future<void> setDailyTargetMinutes(int v) async =>
+      (await _prefs).setInt(_kDailyTargetMinutes, v);
 
   /// Projede çağrılan isim: getTodayDoneMinutes()
   Future<int> getTodayDoneMinutes() async => getDoneMinutesToday();
@@ -530,7 +554,10 @@ class ProgressService {
   }
 
   /// Projede çağrılan isim: addStudyMinutesToday(minutes, reason: ...)
-  Future<void> addStudyMinutesToday(int minutes, {String reason = "Çalışma"}) async {
+  Future<void> addStudyMinutesToday(
+    int minutes, {
+    String reason = "Çalışma",
+  }) async {
     await addDoneMinutesToday(minutes);
     await markStudyToday();
     await ensureDailyMissions();
@@ -563,7 +590,10 @@ class ProgressService {
   /// Dönüş: gerçekten eklenen dakika (cap yüzünden az olabilir)
   Future<int> addManualStudyMinutesToday(int minutes) async {
     final already = await getManualAddedToday();
-    final left = (manualDailyCapMinutes - already).clamp(0, manualDailyCapMinutes);
+    final left = (manualDailyCapMinutes - already).clamp(
+      0,
+      manualDailyCapMinutes,
+    );
     final add = minutes.clamp(0, left);
 
     if (add <= 0) return 0;
@@ -594,15 +624,20 @@ class ProgressService {
   // STUDY LOG
   // ------------------------------------------------------------
 
-  Future<String?> getLastStudyLog() async => (await _prefs).getString(_kLastStudyLog);
+  Future<String?> getLastStudyLog() async =>
+      (await _prefs).getString(_kLastStudyLog);
 
-  Future<void> setLastStudyLog(String text) async => (await _prefs).setString(_kLastStudyLog, text);
+  Future<void> setLastStudyLog(String text) async =>
+      (await _prefs).setString(_kLastStudyLog, text);
 
   // ------------------------------------------------------------
   // RESUME / LAST POSITION
   // ------------------------------------------------------------
 
-  Future<void> setLastPosition({required String moduleCode, required String sectionKey}) async {
+  Future<void> setLastPosition({
+    required String moduleCode,
+    required String sectionKey,
+  }) async {
     final p = await _prefs;
     await p.setString(_kLastPosModule, moduleCode);
     await p.setString(_kLastPosSection, sectionKey);
@@ -616,34 +651,6 @@ class ProgressService {
       "section": p.getString(_kLastPosSection),
       "at": p.getString(_kLastPosAt),
     };
-  }
-
-  bool _matchesAny(String value, List<String> needles) {
-    for (final needle in needles) {
-      if (value.contains(needle)) return true;
-    }
-    return false;
-  }
-
-  Future<void> _applyDailyMissionForSection(String normalizedKey) async {
-    if (_matchesAny(normalizedKey, ['vocab', 'wort', 'wortschatz', 'vocabulary', 'kelime'])) {
-      await markDailyVocabDone();
-      return;
-    }
-
-    if (_matchesAny(normalizedKey, ['listen', 'hoer', 'hör', 'dinle', 'listening'])) {
-      await markDailyListeningDone();
-      return;
-    }
-
-    if (_matchesAny(normalizedKey, ['sprech', 'speak', 'speaking', 'konus', 'konuş'])) {
-      await markDailySpeakingDone();
-      return;
-    }
-
-    if (_matchesAny(normalizedKey, ['quiz', 'exam', 'test', 'sinav', 'sınav', 'pruefung', 'prüfung'])) {
-      await markDailyQuizDone();
-    }
   }
 
   // ------------------------------------------------------------
@@ -660,14 +667,29 @@ class ProgressService {
     if (!alreadyCompleted) {
       await setSectionCompleted(moduleCode, sectionKey, true);
       await addXp(xpReward);
-      await ensureDailyMissions();
-      await _applyDailyMissionForSection(sectionKey.toLowerCase());
-      await markStudyToday();
-      await setLastStudyLog("${todayYmd()} • Bölüm tamamlandı (+$xpReward XP)");
-    } else {
       await markStudyToday();
       await ensureDailyMissions();
-      await setLastStudyLog("${todayYmd()} • Bölüm yeniden açıldı");
+
+      final normalizedKey = sectionKey.toLowerCase();
+
+      if (normalizedKey.contains('vocab') ||
+          normalizedKey.contains('wort') ||
+          normalizedKey.contains('kelime')) {
+        await markDailyVocabDone();
+      } else if (normalizedKey.contains('listen') ||
+          normalizedKey.contains('hoer') ||
+          normalizedKey.contains('hör') ||
+          normalizedKey.contains('dinle')) {
+        await markDailyListeningDone();
+      } else if (normalizedKey.contains('sprech') ||
+          normalizedKey.contains('speak') ||
+          normalizedKey.contains('konus')) {
+        await markDailySpeakingDone();
+      } else if (normalizedKey.contains('quiz') ||
+          normalizedKey.contains('exam') ||
+          normalizedKey.contains('test')) {
+        await markDailyQuizDone();
+      }
     }
 
     final keys = CourseCatalog.sectionKeysFor(moduleCode);
@@ -675,6 +697,7 @@ class ProgressService {
     for (final k in keys) {
       if (await isSectionCompleted(moduleCode, k)) done++;
     }
+
     final progress = keys.isEmpty ? 0 : ((done / keys.length) * 100).round();
     await setModuleProgress(moduleCode, progress);
 
@@ -682,13 +705,18 @@ class ProgressService {
     for (final code in CourseCatalog.moduleCodes) {
       sum += await getModuleProgress(code);
     }
-    final total = CourseCatalog.moduleCodes.isEmpty ? 0 : (sum / CourseCatalog.moduleCodes.length).round();
+
+    final total = CourseCatalog.moduleCodes.isEmpty
+        ? 0
+        : (sum / CourseCatalog.moduleCodes.length).round();
+
     await _setTotalProgress(total);
 
     if (progress >= 100) {
       await completeModule(moduleCode: moduleCode);
     }
 
+    await setLastStudyLog("${todayYmd()} • Bölüm tamamlandı (+$xpReward XP)");
     await setLastPosition(moduleCode: moduleCode, sectionKey: sectionKey);
   }
 

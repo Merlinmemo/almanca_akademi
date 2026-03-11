@@ -55,24 +55,32 @@ class _AnaEkranState extends State<AnaEkran> {
   Future<String> _pickCoachModuleCode() async {
     String? firstUnlocked;
     String? firstUnlockedNotCompleted;
+
     for (final code in CourseCatalog.moduleCodes) {
       final unlocked = await _p.isModuleUnlocked(code);
       if (!unlocked) continue;
+
       firstUnlocked ??= code;
+
       final completed = await _p.isModuleCompleted(code);
       if (!completed) {
         firstUnlockedNotCompleted ??= code;
       }
     }
-    return firstUnlockedNotCompleted ?? firstUnlocked ?? CourseCatalog.firstModuleCode;
+
+    return firstUnlockedNotCompleted ??
+        firstUnlocked ??
+        CourseCatalog.firstModuleCode;
   }
 
   Future<_CoachNext?> _nextCoachTask() async {
     final prefs = await SharedPreferences.getInstance();
     final ymd = ProgressService.todayYmd();
+
     final s = prefs.getBool(_kCoachKey(_kCoachSpeak, ymd)) ?? false;
     final l = prefs.getBool(_kCoachKey(_kCoachListen, ymd)) ?? false;
     final v = prefs.getBool(_kCoachKey(_kCoachVocab, ymd)) ?? false;
+
     if (!s) return _CoachNext.speak;
     if (!l) return _CoachNext.listen;
     if (!v) return _CoachNext.vocab;
@@ -83,9 +91,13 @@ class _AnaEkranState extends State<AnaEkran> {
     final was = _completedCache[moduleCode] ?? false;
     final now = await _p.isModuleCompleted(moduleCode);
     _completedCache[moduleCode] = now;
+
     if (!was && now && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("🎖️ Yeni rozet: $moduleCode"), duration: const Duration(seconds: 2)),
+        SnackBar(
+          content: Text("🎖️ Yeni rozet: $moduleCode"),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -111,15 +123,35 @@ class _AnaEkranState extends State<AnaEkran> {
 
   Future<void> _startCoachTask(_CoachNext task) async {
     final moduleCode = await _pickCoachModuleCode();
-    final m = _modules.firstWhere((x) => x.code == moduleCode, orElse: () => _modules.first);
+    final m = _modules.firstWhere(
+      (x) => x.code == moduleCode,
+      orElse: () => _modules.first,
+    );
+
     late final Widget page;
+
     if (task == _CoachNext.speak) {
-      page = SprechenScreen(moduleCode: moduleCode, title: "Sprechen • Koç", xpReward: 10);
+      page = SprechenScreen(
+        moduleCode: moduleCode,
+        title: "Sprechen • Koç",
+        xpReward: 10,
+      );
     } else if (task == _CoachNext.listen) {
-      page = HoerenScreen(moduleCode: moduleCode, title: "Hören • Koç", xpReward: 8);
+      page = HoerenScreen(
+        moduleCode: moduleCode,
+        title: "Hören • Koç",
+        xpReward: 8,
+        prompts: m.words,
+      );
     } else {
-      page = VocabScreen(moduleCode: moduleCode, title: "Wortschatz • Koç", xpReward: 8, words: m.words);
+      page = VocabScreen(
+        moduleCode: moduleCode,
+        title: "Wortschatz • Koç",
+        xpReward: 8,
+        words: m.words,
+      );
     }
+
     await Navigator.push(context, MaterialPageRoute(builder: (_) => page));
     await _checkNewBadgeAndToast(moduleCode);
     if (mounted) setState(() {});
@@ -140,42 +172,88 @@ class _AnaEkranState extends State<AnaEkran> {
 
     if (moduleCode == null || sectionKey == null) {
       final firstCode = await _pickCoachModuleCode();
-      final m = _modules.firstWhere((x) => x.code == firstCode, orElse: () => _modules.first);
-      await Navigator.push(context, MaterialPageRoute(builder: (_) => ModuleScreen(module: m)));
+      final m = _modules.firstWhere(
+        (x) => x.code == firstCode,
+        orElse: () => _modules.first,
+      );
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ModuleScreen(module: m)),
+      );
       await _checkNewBadgeAndToast(m.code);
       if (mounted) setState(() {});
       return;
     }
 
-    final m = _modules.firstWhere((x) => x.code == moduleCode, orElse: () => _modules.first);
+    final m = _modules.firstWhere(
+      (x) => x.code == moduleCode,
+      orElse: () => _modules.first,
+    );
 
     late final Widget page;
+
     if (moduleCode == 'modul1' && sectionKey != 'intro') {
       page = ModuleScreen(module: m);
     } else {
       final type = _typeFromSectionKey(sectionKey);
-      final sec = m.sections.firstWhere((s) => s.type == type, orElse: () => m.sections.first);
+      final sec = m.sections.firstWhere(
+        (s) => s.type == type,
+        orElse: () => m.sections.first,
+      );
+
       if (type == ModuleSectionType.intro) {
-        page = IntroScreen(moduleCode: m.code, title: sec.title, description: sec.description, xpReward: sec.xpReward);
+        page = IntroScreen(
+          moduleCode: m.code,
+          title: sec.title,
+          description: sec.description,
+          xpReward: sec.xpReward,
+        );
       } else if (type == ModuleSectionType.vocab) {
-        page = VocabScreen(moduleCode: m.code, title: sec.title, xpReward: sec.xpReward, words: m.words);
+        page = VocabScreen(
+          moduleCode: m.code,
+          title: sec.title,
+          xpReward: sec.xpReward,
+          words: m.words,
+        );
       } else if (type == ModuleSectionType.sentence) {
-        page = SatzbauScreen(moduleCode: m.code, title: sec.title, xpReward: sec.xpReward);
+        page = SatzbauScreen(
+          moduleCode: m.code,
+          title: sec.title,
+          xpReward: sec.xpReward,
+        );
       } else if (type == ModuleSectionType.listen) {
-        page = HoerenScreen(moduleCode: m.code, title: sec.title, xpReward: sec.xpReward);
+        page = HoerenScreen(
+          moduleCode: m.code,
+          title: sec.title,
+          xpReward: sec.xpReward,
+          prompts: m.words,
+        );
       } else if (type == ModuleSectionType.speak) {
-        page = SprechenScreen(moduleCode: m.code, title: sec.title, xpReward: sec.xpReward);
+        page = SprechenScreen(
+          moduleCode: m.code,
+          title: sec.title,
+          xpReward: sec.xpReward,
+        );
       } else {
-        page = MiniPruefungScreen(moduleCode: m.code, title: sec.title, xpReward: sec.xpReward, words: m.words);
+        page = MiniPruefungScreen(
+          moduleCode: m.code,
+          title: sec.title,
+          xpReward: sec.xpReward,
+          words: m.words,
+        );
       }
     }
+
     await Navigator.push(context, MaterialPageRoute(builder: (_) => page));
     await _checkNewBadgeAndToast(m.code);
     if (mounted) setState(() {});
   }
 
   Future<void> _openStudyPlan() async {
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyPlanScreen()));
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const StudyPlanScreen()),
+    );
     if (mounted) setState(() {});
   }
 
@@ -184,6 +262,7 @@ class _AnaEkranState extends State<AnaEkran> {
       context,
       MaterialPageRoute(builder: (_) => const SettingsScreen()),
     );
+
     if (changed == true) {
       for (final m in _modules) {
         _completedCache[m.code] = await _p.isModuleCompleted(m.code);
@@ -191,7 +270,6 @@ class _AnaEkranState extends State<AnaEkran> {
       if (mounted) setState(() {});
     }
   }
-
 
   Future<void> _openLessonsHub() async {
     await Navigator.push(
@@ -201,7 +279,10 @@ class _AnaEkranState extends State<AnaEkran> {
           modules: _modules,
           p: _p,
           onOpen: (m) async {
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => ModuleScreen(module: m)));
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ModuleScreen(module: m)),
+            );
             await _checkNewBadgeAndToast(m.code);
             if (mounted) setState(() {});
           },
@@ -212,7 +293,11 @@ class _AnaEkranState extends State<AnaEkran> {
 
   Future<void> _openLatestVocab() async {
     final moduleCode = await _pickCoachModuleCode();
-    final m = _modules.firstWhere((x) => x.code == moduleCode, orElse: () => _modules.first);
+    final m = _modules.firstWhere(
+      (x) => x.code == moduleCode,
+      orElse: () => _modules.first,
+    );
+
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => ModuleScreen(module: m)),
@@ -226,7 +311,11 @@ class _AnaEkranState extends State<AnaEkran> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SatzbauScreen(moduleCode: moduleCode, title: "Satzbau • Hızlı", xpReward: 8),
+        builder: (_) => SatzbauScreen(
+          moduleCode: moduleCode,
+          title: "Satzbau • Hızlı",
+          xpReward: 8,
+        ),
       ),
     );
     if (mounted) setState(() {});
@@ -234,10 +323,20 @@ class _AnaEkranState extends State<AnaEkran> {
 
   Future<void> _openLatestListen() async {
     final moduleCode = await _pickCoachModuleCode();
+    final m = _modules.firstWhere(
+      (x) => x.code == moduleCode,
+      orElse: () => _modules.first,
+    );
+
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => HoerenScreen(moduleCode: moduleCode, title: "Hören • Hızlı", xpReward: 8),
+        builder: (_) => HoerenScreen(
+          moduleCode: moduleCode,
+          title: "Hören • Hızlı",
+          xpReward: 8,
+          prompts: m.words,
+        ),
       ),
     );
     if (mounted) setState(() {});
@@ -245,11 +344,20 @@ class _AnaEkranState extends State<AnaEkran> {
 
   Future<void> _openLatestExam() async {
     final moduleCode = await _pickCoachModuleCode();
-    final m = _modules.firstWhere((x) => x.code == moduleCode, orElse: () => _modules.first);
+    final m = _modules.firstWhere(
+      (x) => x.code == moduleCode,
+      orElse: () => _modules.first,
+    );
+
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MiniPruefungScreen(moduleCode: moduleCode, title: "Mini Prüfung • Hızlı", xpReward: 12, words: m.words),
+        builder: (_) => MiniPruefungScreen(
+          moduleCode: moduleCode,
+          title: "Mini Prüfung • Hızlı",
+          xpReward: 12,
+          words: m.words,
+        ),
       ),
     );
     if (mounted) setState(() {});
@@ -259,7 +367,11 @@ class _AnaEkranState extends State<AnaEkran> {
     final wrongs = await _p.getDueWrongWords();
     if (wrongs.isEmpty) return [];
 
-    final wanted = wrongs.map((e) => e.trim().toLowerCase()).where((e) => e.isNotEmpty).toSet();
+    final wanted = wrongs
+        .map((e) => e.trim().toLowerCase())
+        .where((e) => e.isNotEmpty)
+        .toSet();
+
     final out = <WordItem>[];
     final seen = <String>{};
 
@@ -280,7 +392,9 @@ class _AnaEkranState extends State<AnaEkran> {
     if (words.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bugün tekrar edilmesi gereken kelime yok.')),
+        const SnackBar(
+          content: Text('Bugün tekrar edilmesi gereken kelime yok.'),
+        ),
       );
       return;
     }
@@ -296,6 +410,7 @@ class _AnaEkranState extends State<AnaEkran> {
         ),
       ),
     );
+
     if (mounted) setState(() {});
   }
 
@@ -310,96 +425,142 @@ class _AnaEkranState extends State<AnaEkran> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
+      backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(14, 10, 14, 16 + bottomInset),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _CompactTopBar(onSettings: _openSettings),
-              const SizedBox(height: 10),
-              _CompactHeroBanner(onContinue: _continueLast),
-              const SizedBox(height: 10),
-              _SectionTitle(title: "Hızlı Başlangıç", subtitle: "Asıl akış tek dokunuşla açılsın. Geri kalanı sade kalsın."),
-              const SizedBox(height: 8),
-              _CompactTileGrid(
-                tiles: [
-                  _CompactHomeTileData("Dersler", "Konular", Icons.menu_book_rounded, _openLessonsHub),
-                  _CompactHomeTileData("Kelimeler", "Sözlük", Icons.abc_rounded, _openLatestVocab),
-                  _CompactHomeTileData("Cümleler", "Örnekler", Icons.chat_bubble_outline_rounded, _openLatestSatzbau),
-                  _CompactHomeTileData("Dinleme", "Pratik", Icons.headphones_rounded, _openLatestListen),
-                  _CompactHomeTileData("Yazma", "Alıştırma", Icons.edit_note_rounded, () => _toast("Yazma yakında.")),
-                  _CompactHomeTileData("Testler", "Mini sınav", Icons.fact_check_rounded, _openLatestExam, badge: "Yeni"),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _CompactWordCard(wordDe: "das Auto", wordTr: "Araba", onSpeak: _speakWord)),
-                  const SizedBox(width: 8),
-                  Expanded(child: _CompactDailyGoalCard(p: _p, onContinue: _continueLast, onPlan: _openStudyPlan)),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _SectionTitle(title: "Tekrar", subtitle: "Bugün zayıf kaldığın kelimeleri tek yerden toparla."),
-              const SizedBox(height: 8),
-              _CompactWrongWordsCard(p: _p, onOpen: _openWrongWordsReview),
-            ],
-          ),
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 18 + bottomInset),
+          children: [
+            _TopBar(onSettings: _openSettings),
+            const SizedBox(height: 14),
+            _ContinueCard(onContinue: _continueLast),
+            const SizedBox(height: 16),
+            _SectionHeader(
+              title: 'Hızlı Başlangıç',
+              subtitle: 'En çok kullanılan bölümlere tek dokunuşla git.',
+            ),
+            const SizedBox(height: 10),
+            _QuickGrid(
+              tiles: [
+                _QuickTileData(
+                  title: 'Dersler',
+                  subtitle: 'Konular',
+                  icon: Icons.menu_book_rounded,
+                  onTap: _openLessonsHub,
+                ),
+                _QuickTileData(
+                  title: 'Kelimeler',
+                  subtitle: 'Sözlük',
+                  icon: Icons.abc_rounded,
+                  onTap: _openLatestVocab,
+                ),
+                _QuickTileData(
+                  title: 'Cümleler',
+                  subtitle: 'Örnekler',
+                  icon: Icons.chat_bubble_outline_rounded,
+                  onTap: _openLatestSatzbau,
+                ),
+                _QuickTileData(
+                  title: 'Dinleme',
+                  subtitle: 'Pratik',
+                  icon: Icons.headphones_rounded,
+                  onTap: _openLatestListen,
+                ),
+                _QuickTileData(
+                  title: 'Yazma',
+                  subtitle: 'Alıştırma',
+                  icon: Icons.edit_note_rounded,
+                  onTap: () => _toast('Yazma yakında.'),
+                ),
+                _QuickTileData(
+                  title: 'Testler',
+                  subtitle: 'Mini sınav',
+                  icon: Icons.fact_check_rounded,
+                  onTap: _openLatestExam,
+                  badge: 'Yeni',
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _WordCard(
+                    wordDe: 'das Auto',
+                    wordTr: 'Araba',
+                    onSpeak: _speakWord,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _DailyGoalCard(
+                    p: _p,
+                    onContinue: _continueLast,
+                    onPlan: _openStudyPlan,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _SectionHeader(
+              title: 'Tekrar',
+              subtitle: 'Bugün zayıf kaldığın kelimeleri tek yerden toparla.',
+            ),
+            const SizedBox(height: 10),
+            _WrongWordsCard(p: _p, onOpen: _openWrongWordsReview),
+          ],
         ),
       ),
     );
   }
 }
 
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _SectionTitle({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white)),
-        const SizedBox(height: 4),
-        Text(subtitle, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white.withOpacity(0.72))),
-      ],
-    );
-  }
-}
-
-class _CompactTopBar extends StatelessWidget {
+class _TopBar extends StatelessWidget {
   final VoidCallback onSettings;
-  const _CompactTopBar({required this.onSettings});
+  const _TopBar({required this.onSettings});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          height: 42,
-          width: 42,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.10)),
-          child: const Center(child: Text("🇩🇪", style: TextStyle(fontSize: 22))),
+          height: 44,
+          width: 44,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withOpacity(0.10),
+          ),
+          child: const Center(
+            child: Text('🇩🇪', style: TextStyle(fontSize: 22)),
+          ),
         ),
         const SizedBox(width: 10),
         const Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Almanca Akademi", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+              Text(
+                'Almanca Akademi',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 19,
+                  color: Colors.white,
+                ),
+              ),
               SizedBox(height: 2),
-              Text("A1 → A2 → B1 → B2", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w700, fontSize: 11)),
+              Text(
+                'A1 → A2 → B1 → B2',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11.5,
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(width: 8),
         IconButton(
           tooltip: 'Ayarlar',
           onPressed: onSettings,
@@ -410,21 +571,27 @@ class _CompactTopBar extends StatelessWidget {
   }
 }
 
-class _CompactHeroBanner extends StatelessWidget {
+class _ContinueCard extends StatelessWidget {
   final VoidCallback onContinue;
-  const _CompactHeroBanner({required this.onContinue});
+  const _ContinueCard({required this.onContinue});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 148,
+      height: 162,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         image: const DecorationImage(
           image: AssetImage('assets/ui/academy_home_metal.png'),
           fit: BoxFit.cover,
         ),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.24), blurRadius: 18, offset: const Offset(0, 8))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.24),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Stack(
         children: [
@@ -435,32 +602,75 @@ class _CompactHeroBanner extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.black.withOpacity(0.10), Colors.black.withOpacity(0.30)],
+                  colors: [
+                    Colors.black.withOpacity(0.10),
+                    Colors.black.withOpacity(0.30),
+                  ],
                 ),
               ),
             ),
           ),
-          Positioned(right: 12, top: 16, child: _CompactChip(text: "Seviye: A1", icon: Icons.auto_graph_rounded)),
+          Positioned(
+            right: 14,
+            top: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                color: Colors.white.withOpacity(0.92),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_graph_rounded, size: 14, color: Colors.black87),
+                  SizedBox(width: 6),
+                  Text(
+                    'Seviye: A1',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black87,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Positioned(
             left: 16,
             right: 16,
-            bottom: 14,
+            bottom: 16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Kaldığın yerden devam et", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 0.1)),
-                const SizedBox(height: 8),
+                const Text(
+                  'Kaldığın yerden devam et',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
                 SizedBox(
-                  height: 48,
+                  height: 50,
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: onContinue,
-                    icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                    label: const Text("Devam Et", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+                    icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                    label: const Text(
+                      'Devam Et',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.accent,
                       foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -473,97 +683,161 @@ class _CompactHeroBanner extends StatelessWidget {
   }
 }
 
-class _CompactChip extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  const _CompactChip({required this.text, required this.icon});
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  const _SectionHeader({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(999), color: Colors.white.withOpacity(0.94)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: Colors.black87),
-          const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.black87, fontSize: 11)),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withOpacity(0.72),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _CompactHomeTileData {
+class _QuickTileData {
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
   final String? badge;
-  _CompactHomeTileData(this.title, this.subtitle, this.icon, this.onTap, {this.badge});
+
+  _QuickTileData({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+    this.badge,
+  });
 }
 
-class _CompactTileGrid extends StatelessWidget {
-  final List<_CompactHomeTileData> tiles;
-  const _CompactTileGrid({required this.tiles});
+class _QuickGrid extends StatelessWidget {
+  final List<_QuickTileData> tiles;
+  const _QuickGrid({required this.tiles});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        const gap = 8.0;
+        const gap = 10.0;
         final itemW = (c.maxWidth - gap) / 2;
+
         return Wrap(
           spacing: gap,
           runSpacing: gap,
           children: tiles.map((t) {
             return SizedBox(
               width: itemW,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: t.onTap,
-                child: Ink(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF163553), Color(0xFF0E2A47)],
-                    ),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.14), blurRadius: 10, offset: const Offset(0, 5))],
-                  ),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: t.badge == null
-                            ? const SizedBox(height: 16)
-                            : Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(color: const Color(0xFFFF5148), borderRadius: BorderRadius.circular(999)),
-                                child: Text(t.badge!, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11)),
-                              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: t.onTap,
+                  child: Ink(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF163553),
+                          Color(0xFF0E2A47),
+                        ],
                       ),
-                      Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Color(0xFF1B4C7A), Color(0xFF0E2A47)],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.14),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: t.badge == null
+                              ? const SizedBox(height: 18)
+                              : Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF5148),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    t.badge!,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 11,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        Container(
+                          height: 52,
+                          width: 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: Colors.white.withOpacity(0.10),
+                          ),
+                          child: Icon(
+                            t.icon,
+                            color: AppTheme.accent,
+                            size: 24,
                           ),
                         ),
-                        child: Icon(t.icon, color: AppTheme.accent, size: 22),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 13)),
-                      const SizedBox(height: 4),
-                      Text(t.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w700, fontSize: 11)),
-                    ],
+                        const SizedBox(height: 12),
+                        Text(
+                          t.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          t.subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -575,50 +849,101 @@ class _CompactTileGrid extends StatelessWidget {
   }
 }
 
-class _CompactWordCard extends StatelessWidget {
+class _WordCard extends StatelessWidget {
   final String wordDe;
   final String wordTr;
   final VoidCallback onSpeak;
-  const _CompactWordCard({required this.wordDe, required this.wordTr, required this.onSpeak});
+
+  const _WordCard({
+    required this.wordDe,
+    required this.wordTr,
+    required this.onSpeak,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 154,
-      padding: const EdgeInsets.all(12),
+      height: 156,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         image: const DecorationImage(
           image: AssetImage('assets/ui/academy_gold_panel.png'),
           fit: BoxFit.cover,
         ),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.14), blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.14),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Günün Kelimesi", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 11.5)),
+          const Text(
+            'Günün Kelimesi',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              fontSize: 12,
+            ),
+          ),
           const Spacer(),
           Row(
             children: [
-              Expanded(child: Text(wordDe, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Colors.white))),
-              IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(minWidth: 28, minHeight: 28), onPressed: onSpeak, icon: const Icon(Icons.volume_up_rounded, color: Colors.white, size: 22)),
+              Expanded(
+                child: Text(
+                  wordDe,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                onPressed: onSpeak,
+                icon: const Icon(
+                  Icons.volume_up_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 4),
-          Text("→ $wordTr", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white70, fontSize: 10)),
+          Text(
+            '→ $wordTr',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              color: Colors.white70,
+              fontSize: 11,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-
-class _CompactDailyGoalCard extends StatelessWidget {
+class _DailyGoalCard extends StatelessWidget {
   final ProgressService p;
   final VoidCallback onContinue;
   final VoidCallback onPlan;
-  const _CompactDailyGoalCard({required this.p, required this.onContinue, required this.onPlan});
+
+  const _DailyGoalCard({
+    required this.p,
+    required this.onContinue,
+    required this.onPlan,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -631,18 +956,22 @@ class _CompactDailyGoalCard extends StatelessWidget {
         p.isDailyMissionCompleted(),
       ]),
       builder: (context, snap) {
-        final progress = (snap.data?[0] as Map<String, int>?) ?? const {
-          'vocab': 0,
-          'listening': 0,
-          'speaking': 0,
-          'quiz': 0,
-        };
-        final goals = (snap.data?[1] as Map<String, int>?) ?? const {
-          'vocab': 5,
-          'listening': 2,
-          'speaking': 2,
-          'quiz': 1,
-        };
+        final progress = (snap.data?[0] as Map<String, int>?) ??
+            const {
+              'vocab': 0,
+              'listening': 0,
+              'speaking': 0,
+              'quiz': 0,
+            };
+
+        final goals = (snap.data?[1] as Map<String, int>?) ??
+            const {
+              'vocab': 5,
+              'listening': 2,
+              'speaking': 2,
+              'quiz': 1,
+            };
+
         final ratio = ((snap.data?[2] as double?) ?? 0.0).clamp(0.0, 1.0);
         final streak = (snap.data?[3] as int?) ?? 0;
         final completed = (snap.data?[4] as bool?) ?? false;
@@ -663,11 +992,13 @@ class _CompactDailyGoalCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           onTap: onContinue,
           child: Container(
-            height: 150,
-            padding: const EdgeInsets.all(12),
+            height: 156,
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              color: completed ? const Color(0xFF143A2A) : const Color(0xFF0F2E5E),
+              color: completed
+                  ? const Color(0xFF143A2A)
+                  : const Color(0xFF0F2E5E),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.14),
@@ -688,13 +1019,17 @@ class _CompactDailyGoalCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
-                          fontSize: 11.5,
+                          fontSize: 11,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
                         color: Colors.white.withOpacity(0.12),
@@ -706,32 +1041,33 @@ class _CompactDailyGoalCard extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
-                          fontSize: 9.5,
+                          fontSize: 9,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   '$totalDone / $totalGoal adım',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 16,
+                    fontSize: 15,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Kelime • Dinleme • Konuşma • Quiz',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white70,
                     fontWeight: FontWeight.w700,
-                    fontSize: 10.5,
-                    height: 1.2,
+                    fontSize: 10,
+                    height: 1.1,
                   ),
                 ),
                 const Spacer(),
@@ -739,14 +1075,14 @@ class _CompactDailyGoalCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                   child: LinearProgressIndicator(
                     value: ratio,
-                    minHeight: 8,
+                    minHeight: 7,
                     backgroundColor: Colors.white24,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       completed ? const Color(0xFF6EF3B1) : AppTheme.accent,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 5),
                 Center(
                   child: Text(
                     completed ? 'Dokun ve sürdür' : 'Dokun ve devam et',
@@ -755,7 +1091,7 @@ class _CompactDailyGoalCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       color: Colors.white70,
-                      fontSize: 10,
+                      fontSize: 9.5,
                     ),
                   ),
                 ),
@@ -768,11 +1104,10 @@ class _CompactDailyGoalCard extends StatelessWidget {
   }
 }
 
-
-class _CompactWrongWordsCard extends StatelessWidget {
+class _WrongWordsCard extends StatelessWidget {
   final ProgressService p;
   final VoidCallback onOpen;
-  const _CompactWrongWordsCard({required this.p, required this.onOpen});
+  const _WrongWordsCard({required this.p, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
@@ -782,11 +1117,13 @@ class _CompactWrongWordsCard extends StatelessWidget {
         final words = snap.data ?? const <String>[];
         final count = words.length;
         final hasItems = count > 0;
-        final preview = hasItems ? words.take(3).join(' • ') : 'Harika. Zayıf kelime havuzu şu an boş.';
+        final preview = hasItems
+            ? words.take(3).join(' • ')
+            : 'Harika. Zayıf kelime havuzu şu an boş.';
 
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             color: hasItems ? const Color(0xFF3A1E12) : const Color(0xFF123B73),
@@ -801,8 +1138,8 @@ class _CompactWrongWordsCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                height: 46,
-                width: 46,
+                height: 48,
+                width: 48,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
                   color: Colors.white.withOpacity(0.12),
@@ -818,42 +1155,63 @@ class _CompactWrongWordsCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hasItems ? 'Tekrar Edilecek Kelimeler' : 'Zayıf Kelime Havuzu Temiz',
+                      hasItems
+                          ? 'Tekrar Edilecek Kelimeler'
+                          : 'Zayıf Kelime Havuzu Temiz',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      hasItems ? '$count kelime seni bekliyor' : 'Yanlış yaptığın kelimeler burada birikecek.',
+                      hasItems
+                          ? '$count kelime seni bekliyor'
+                          : 'Yanlış yaptığın kelimeler burada birikecek.',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w700, fontSize: 10),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10.5,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       preview,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white.withOpacity(0.82), fontWeight: FontWeight.w700, fontSize: 10),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.82),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10.5,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
               SizedBox(
-                height: 34,
+                height: 36,
                 child: ElevatedButton(
                   onPressed: onOpen,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black87,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                   child: Text(
                     hasItems ? 'Tekrar Et' : 'Aç',
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ),
@@ -869,22 +1227,36 @@ class _LessonsHubScreen extends StatelessWidget {
   final List<ModuleModel> modules;
   final ProgressService p;
   final Future<void> Function(ModuleModel m) onOpen;
-  const _LessonsHubScreen({required this.modules, required this.p, required this.onOpen});
+
+  const _LessonsHubScreen({
+    required this.modules,
+    required this.p,
+    required this.onOpen,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Dersler")),
+      backgroundColor: AppTheme.backgroundDark,
+      appBar: AppBar(title: const Text('Dersler')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
         children: [
-          Text("Modüller", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: Colors.white.withOpacity(0.96))),
+          Text(
+            'Modüller',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 24,
+              color: Colors.white.withOpacity(0.96),
+            ),
+          ),
           const SizedBox(height: 8),
           ...modules.map((m) {
             return FutureBuilder<bool>(
               future: p.isModuleUnlocked(m.code),
               builder: (context, snap) {
                 final unlocked = snap.data ?? false;
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: InkWell(
@@ -905,22 +1277,44 @@ class _LessonsHubScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(14),
                               color: Colors.white.withOpacity(0.08),
-                              border: Border.all(color: Colors.white.withOpacity(0.10)),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.10),
+                              ),
                             ),
-                            child: Icon(unlocked ? Icons.play_circle_fill_rounded : Icons.lock_rounded, color: unlocked ? AppTheme.accent : Colors.white38),
+                            child: Icon(
+                              unlocked
+                                  ? Icons.play_circle_fill_rounded
+                                  : Icons.lock_rounded,
+                              color: unlocked ? AppTheme.accent : Colors.white38,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(m.title, style: const TextStyle(fontWeight: FontWeight.w900)),
+                                Text(
+                                  m.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
-                                Text(m.subtitle, style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w700)),
+                                Text(
+                                  m.subtitle,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.6)),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: Colors.white.withOpacity(0.6),
+                          ),
                         ],
                       ),
                     ),

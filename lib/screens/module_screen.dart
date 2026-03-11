@@ -70,19 +70,19 @@ class _ModuleScreenState extends State<ModuleScreen> {
   String _sectionShortTitle(ModuleSectionType t) {
     switch (t) {
       case ModuleSectionType.intro:
-        return 'Giriş';
+        return 'Giriş / Einführung';
       case ModuleSectionType.vocab:
-        return 'Kelimeler';
+        return 'Kelimeler / Wörter';
       case ModuleSectionType.micro:
-        return 'Hızlı tekrar';
+        return 'Hızlı Tekrar / Schnell';
       case ModuleSectionType.sentence:
-        return 'Cümleler';
+        return 'Cümle Kurma / Satzbau';
       case ModuleSectionType.listen:
-        return 'Dinleme';
+        return 'Dinleme / Hören';
       case ModuleSectionType.speak:
-        return 'Konuşma';
+        return 'Konuşma / Sprechen';
       case ModuleSectionType.exam:
-        return 'Mini test';
+        return 'Mini Test / Prüfung';
     }
   }
 
@@ -196,211 +196,249 @@ class _ModuleScreenState extends State<ModuleScreen> {
     setState(() {});
   }
 
-  Future<_PathSnapshot> _buildModul1Snapshot() async {
-    final progress = (await _p.getModuleProgress(widget.module.code)).clamp(0, 100);
-    int completedCount = 0;
-    String? nextTitle;
-    bool nextLocked = false;
+  Future<_ModuleOverviewData> _buildOverviewData() async {
+    final module = widget.module;
+    final progress = (await _p.getModuleProgress(module.code)).clamp(0, 100);
 
-    for (int i = 0; i < Modul1CourseData.units.length; i++) {
-      final unit = Modul1CourseData.units[i];
-      final done = await _p.isSectionCompleted('modul1', unit.key);
-      if (done) {
-        completedCount++;
-        continue;
+    if (module.code == 'modul1') {
+      int completedCount = 0;
+      String nextTitle = 'Bu modülün ilk adımı hazır';
+
+      for (int i = 0; i < Modul1CourseData.units.length; i++) {
+        final unit = Modul1CourseData.units[i];
+        final done = await _p.isSectionCompleted('modul1', unit.key);
+        if (done) {
+          completedCount++;
+        } else {
+          nextTitle = unit.title;
+          break;
+        }
       }
-      nextTitle ??= unit.title;
-      nextLocked = !(await _canOpenModul1Unit(i));
-      break;
+
+      if (completedCount >= Modul1CourseData.units.length) {
+        nextTitle = 'Tüm adımlar tamamlandı';
+      }
+
+      return _ModuleOverviewData(
+        progress: progress,
+        completedCount: completedCount,
+        totalCount: Modul1CourseData.units.length,
+        nextTitle: nextTitle,
+      );
     }
 
-    nextTitle ??= 'Modül tamamlandı';
-
-    return _PathSnapshot(
-      progress: progress,
-      completedCount: completedCount,
-      totalCount: Modul1CourseData.units.length,
-      nextTitle: nextTitle,
-      nextLocked: nextLocked,
-    );
-  }
-
-  Future<_PathSnapshot> _buildGenericSnapshot() async {
-    final m = widget.module;
-    final progress = (await _p.getModuleProgress(m.code)).clamp(0, 100);
     int completedCount = 0;
-    String? nextTitle;
-    bool nextLocked = false;
+    String nextTitle = 'İlk bölüme başlayabilirsin';
 
-    for (int i = 0; i < m.sections.length; i++) {
-      final sec = m.sections[i];
-      final done = await _p.isSectionCompleted(m.code, _sectionKey(sec.type));
+    for (final sec in module.sections) {
+      final done = await _p.isSectionCompleted(module.code, _sectionKey(sec.type));
       if (done) {
         completedCount++;
-        continue;
+      } else {
+        nextTitle = _sectionShortTitle(sec.type);
+        break;
       }
-      nextTitle ??= _sectionShortTitle(sec.type);
-      nextLocked = !(await _canOpenSection(i));
-      break;
     }
 
-    nextTitle ??= 'Modül tamamlandı';
+    if (completedCount >= module.sections.length) {
+      nextTitle = 'Tüm bölümler tamamlandı';
+    }
 
-    return _PathSnapshot(
+    return _ModuleOverviewData(
       progress: progress,
       completedCount: completedCount,
-      totalCount: m.sections.length,
+      totalCount: module.sections.length,
       nextTitle: nextTitle,
-      nextLocked: nextLocked,
     );
   }
 
   Widget _pathHeader() {
-    return FutureBuilder<int>(
-      future: _p.getModuleProgress(widget.module.code),
+    return FutureBuilder<_ModuleOverviewData>(
+      future: _buildOverviewData(),
       builder: (context, snap) {
-        final progress = (snap.data ?? 0).clamp(0, 100);
-        return Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            image: const DecorationImage(
-              image: AssetImage('assets/ui/academy_module_metal.png'),
-              fit: BoxFit.cover,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.24),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.module.title,
-                style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                widget.module.subtitle,
-                style: TextStyle(
-                  fontSize: 14.5,
-                  color: Colors.white.withOpacity(0.84),
-                  fontWeight: FontWeight.w700,
+        final data = snap.data ??
+            const _ModuleOverviewData(
+              progress: 0,
+              completedCount: 0,
+              totalCount: 0,
+              nextTitle: 'Yükleniyor...',
+            );
+
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                image: const DecorationImage(
+                  image: AssetImage('assets/ui/academy_module_metal.png'),
+                  fit: BoxFit.cover,
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
-                      color: AppTheme.accent.withOpacity(0.16),
-                    ),
-                    child: Text(
-                      '%$progress tamam',
-                      style: const TextStyle(fontWeight: FontWeight.w900),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    height: 44,
-                    width: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.12),
-                    ),
-                    child: const Icon(Icons.menu_book_rounded, color: Colors.white),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.24),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: progress / 100,
-                  minHeight: 10,
-                  backgroundColor: Colors.white24,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accent),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _learningPathSummary(Future<_PathSnapshot> future) {
-    return FutureBuilder<_PathSnapshot>(
-      future: future,
-      builder: (context, snap) {
-        final data = snap.data;
-        final completedCount = data?.completedCount ?? 0;
-        final totalCount = data?.totalCount ?? 0;
-        final nextTitle = data?.nextTitle ?? 'Yükleniyor...';
-        final nextLocked = data?.nextLocked ?? false;
-
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: Colors.white.withOpacity(0.05),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.14),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
+                  Text(
+                    widget.module.title,
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.module.subtitle,
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: Colors.white.withOpacity(0.84),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(999),
+                          color: AppTheme.accent.withOpacity(0.16),
+                        ),
+                        child: Text(
+                          '%${data.progress} tamam',
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        height: 44,
+                        width: 44,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.12),
+                        ),
+                        child: const Icon(
+                          Icons.menu_book_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: data.progress / 100,
+                      minHeight: 10,
+                      backgroundColor: Colors.white24,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppTheme.accent,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: Colors.white.withOpacity(0.05),
+                border: Border.all(color: Colors.white.withOpacity(0.10)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _InfoBox(
+                          icon: Icons.check_circle_rounded,
+                          label: 'Tamamlanan',
+                          value: '${data.completedCount}/${data.totalCount}',
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _InfoBox(
+                          icon: Icons.flag_rounded,
+                          label: 'Sıradaki Adım',
+                          value: data.completedCount >= data.totalCount ? 'Bitti' : 'Hazır',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      color: Colors.white.withOpacity(0.04),
+                      border: Border.all(color: Colors.white.withOpacity(0.08)),
+                    ),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Sıradaki adım',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.74),
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800,
+                        Container(
+                          height: 34,
+                          width: 34,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.accent.withOpacity(0.16),
+                          ),
+                          child: const Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          nextTitle,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Önerilen sonraki adım',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white.withOpacity(0.72),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                data.nextTitle,
+                                style: const TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  _MiniPill(label: nextLocked ? 'Kilitli sıra' : 'Hazır'),
                 ],
               ),
-              const SizedBox(height: 14),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _MiniPill(label: '$completedCount/$totalCount adım'),
-                  _MiniPill(label: '${widget.module.estimatedMinutes} dk'),
-                  _MiniPill(label: widget.module.words.isEmpty ? 'İçerik modülü' : '${widget.module.words.length} kelime'),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -427,8 +465,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
         : active
             ? [const Color(0xFF1B4C7A), const Color(0xFF0E2A47)]
             : [Colors.white12, Colors.white10];
-
-    final statusLabel = completed ? 'Tamamlandı' : (locked ? 'Kilitli' : 'Şimdi');
 
     return Column(
       children: [
@@ -465,7 +501,9 @@ class _ModuleScreenState extends State<ModuleScreen> {
                         ),
                       ),
                       child: Icon(
-                        completed ? Icons.check_rounded : (locked ? Icons.lock_rounded : icon),
+                        completed
+                            ? Icons.check_rounded
+                            : (locked ? Icons.lock_rounded : icon),
                         color: Colors.white,
                         size: 30,
                       ),
@@ -508,14 +546,21 @@ class _ModuleScreenState extends State<ModuleScreen> {
                           children: [
                             Text(
                               title,
-                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 18,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
                               children: [
-                                _MiniPill(label: statusLabel),
+                                _MiniPill(
+                                  label: completed
+                                      ? 'Bitti'
+                                      : (locked ? 'Kilitli' : 'Şimdi'),
+                                ),
                                 if (tag != null) _MiniPill(label: tag),
                               ],
                             ),
@@ -526,7 +571,9 @@ class _ModuleScreenState extends State<ModuleScreen> {
                       Icon(
                         completed
                             ? Icons.verified_rounded
-                            : (locked ? Icons.lock_rounded : Icons.chevron_right_rounded),
+                            : (locked
+                                ? Icons.lock_rounded
+                                : Icons.chevron_right_rounded),
                         color: ringColor,
                         size: 28,
                       ),
@@ -546,8 +593,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
       padding: const EdgeInsets.all(14),
       children: [
         _pathHeader(),
-        const SizedBox(height: 14),
-        _learningPathSummary(_buildModul1Snapshot()),
         const SizedBox(height: 16),
         Text(
           'Öğrenme Yolu',
@@ -600,8 +645,6 @@ class _ModuleScreenState extends State<ModuleScreen> {
       padding: const EdgeInsets.all(14),
       children: [
         _pathHeader(),
-        const SizedBox(height: 14),
-        _learningPathSummary(_buildGenericSnapshot()),
         const SizedBox(height: 16),
         Text(
           'Öğrenme Yolu',
@@ -666,7 +709,10 @@ class _ModuleScreenState extends State<ModuleScreen> {
                           Expanded(
                             child: Text(
                               'Bu modül henüz kilitli. Önce önceki modülü bitir.',
-                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 17,
+                              ),
                             ),
                           ),
                         ],
@@ -680,20 +726,67 @@ class _ModuleScreenState extends State<ModuleScreen> {
   }
 }
 
-class _PathSnapshot {
-  final int progress;
-  final int completedCount;
-  final int totalCount;
-  final String nextTitle;
-  final bool nextLocked;
+class _InfoBox extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
 
-  const _PathSnapshot({
-    required this.progress,
-    required this.completedCount,
-    required this.totalCount,
-    required this.nextTitle,
-    required this.nextLocked,
+  const _InfoBox({
+    required this.icon,
+    required this.label,
+    required this.value,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withOpacity(0.04),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 34,
+            width: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.08),
+            ),
+            child: Icon(icon, color: Colors.white, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.72),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MiniPill extends StatelessWidget {
@@ -719,4 +812,18 @@ class _MiniPill extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ModuleOverviewData {
+  final int progress;
+  final int completedCount;
+  final int totalCount;
+  final String nextTitle;
+
+  const _ModuleOverviewData({
+    required this.progress,
+    required this.completedCount,
+    required this.totalCount,
+    required this.nextTitle,
+  });
 }

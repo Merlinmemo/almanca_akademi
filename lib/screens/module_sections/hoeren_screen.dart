@@ -1,129 +1,209 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 
-import '../../models/generated_content_models.dart';
-import '../../services/content_engine/sentence_engine.dart';
+import '../../models/word_model.dart';
 import '../../services/progress_service.dart';
 import '../../services/tts_service.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/course_ui.dart';
 
 class HoerenScreen extends StatefulWidget {
   final String moduleCode;
   final String title;
   final int xpReward;
+  final List<WordItem> prompts;
 
-  const HoerenScreen({super.key, required this.moduleCode, required this.title, required this.xpReward});
+  const HoerenScreen({
+    super.key,
+    required this.moduleCode,
+    required this.title,
+    required this.xpReward,
+    this.prompts = const [],
+  });
 
   @override
   State<HoerenScreen> createState() => _HoerenScreenState();
 }
 
 class _HoerenScreenState extends State<HoerenScreen> {
-  final ProgressService _p = ProgressService();
-  late final List<SentencePattern> _qs = SentenceEngine.I.generatePatternSet(moduleCode: widget.moduleCode, level: 3, count: 8);
-  int _i = 0;
-  int? _selected;
-  bool _checked = false;
-  int _correct = 0;
-  bool _playedOnce = false;
-  SentencePattern get _q => _qs[_i];
+  final ProgressService _progressService = ProgressService();
 
-  Future<void> _play() async {
-    await TtsService.I.stop();
-    await TtsService.I.speakDe(_q.exampleDe);
-    if (mounted) setState(() => _playedOnce = true);
+  int _index = 0;
+  bool _completed = false;
+  bool _answered = false;
+
+  List<String> _options = [];
+  String _correct = '';
+
+  List<WordItem> get _items => widget.prompts;
+
+  WordItem get _current => _items[_index];
+
+  @override
+  void initState() {
+    super.initState();
+    if (_items.isNotEmpty) {
+      _prepareQuestion();
+    }
   }
 
-  void _check() {
-    if (_selected == null) return;
-    final ok = _selected == _q.correctIndex;
+  void _prepareQuestion() {
+    final correct = _current.tr;
+
+    final pool = _items.map((e) => e.tr).where((e) => e != correct).toList()..shuffle();
+
+    _options = [
+      correct,
+      if (pool.isNotEmpty) pool[0],
+      if (pool.length > 1) pool[1],
+      if (pool.length > 2) pool[2],
+    ]..shuffle();
+
+    _correct = correct;
+    _answered = false;
+  }
+
+  Future<void> _play() async {
+    await TtsService.I.speakDe(_current.de);
+  }
+
+  void _choose(String value) {
+    if (_answered) return;
+
     setState(() {
-      _checked = true;
-      if (ok) _correct++;
+      _answered = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      _next();
     });
   }
 
-  Future<void> _nextOrFinish() async {
-    if (_i < _qs.length - 1) {
+  void _next() {
+    if (_index < _items.length - 1) {
       setState(() {
-        _i++;
-        _selected = null;
-        _checked = false;
-        _playedOnce = false;
+        _index++;
+        _prepareQuestion();
       });
-      return;
+    } else {
+      _finish();
     }
-    await _p.completeSection(moduleCode: widget.moduleCode, sectionKey: 'listen', xpReward: widget.xpReward);
+  }
+
+  Future<void> _finish() async {
+    if (_completed) return;
+
+    await _progressService.completeSection(
+      moduleCode: widget.moduleCode,
+      sectionKey: 'listen',
+      xpReward: widget.xpReward,
+    );
+
+    setState(() {
+      _completed = true;
+    });
+
     if (!mounted) return;
-    await showDialog(
+
+    showDialog(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Dinleme tamamlandı ✅'),
-        content: Text('Doğru: $_correct / ${_qs.length}\n\nŞimdi konuşma bölümüne geçebilirsin.'),
-        actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('Tamam'))],
+        title: const Text('Harika! 🎧'),
+        content: const Text('Dinleme egzersizi tamamlandı.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(c);
+              Navigator.pop(context);
+            },
+            child: const Text('Devam'),
+          ),
+        ],
       ),
     );
-    if (!mounted) return;
-    Navigator.pop(context);
+  }
+
+  Widget _buildProgressBar() {
+    final value = _items.isEmpty ? 0.0 : (_index + 1) / _items.length;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: LinearProgressIndicator(value: value, minHeight: 10),
+    );
+  }
+
+  Widget _optionButton(String text) {
+    Color color = Colors.white.withOpacity(0.1);
+
+    if (_answered) {
+      if (text == _correct) {
+        color = Colors.green.withOpacity(0.6);
+      } else {
+        color = Colors.red.withOpacity(0.35);
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          minimumSize: const Size.fromHeight(48),
+        ),
+        onPressed: () => _choose(text),
+        child: Text(text),
+      ),
+    );
+  }
+
+  Widget _buildCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white.withOpacity(0.06),
+        border: Border.all(color: Colors.white.withOpacity(0.10)),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Dinle ve doğru anlamı seç',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          IconButton(
+            icon: const Icon(Icons.volume_up_rounded, size: 36),
+            onPressed: _play,
+          ),
+          const SizedBox(height: 20),
+          ..._options.map(_optionButton),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_qs.isEmpty) return const Scaffold(body: Center(child: Text('Dinleme içeriği bulunamadı.')));
-    final total = _qs.length;
-    final progress = ((_i + 1) / total).clamp(0.0, 1.0);
-    return CoursePage(
-      title: widget.title,
-      subtitle: 'Dinle ve doğru cümleyi seç',
-      leadingIcon: Icons.headphones_rounded,
-      bottomBar: BottomActionsBar(
-        child: Row(
-          children: [
-            Expanded(child: ElevatedButton(onPressed: (_selected == null || _checked) ? null : _check, child: const Text('Kontrol Et'))),
-            const SizedBox(width: 10),
-            Expanded(child: ElevatedButton(onPressed: !_checked ? null : _nextOrFinish, child: Text(_i == total - 1 ? 'Bitir' : 'Devam'))),
-          ],
+    if (_items.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
+        body: const Center(
+          child: Text('Bu ders için dinleme verisi bulunamadı.'),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(14),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: Column(
         children: [
-          AppCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Soru ${_i + 1} / $total', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24)),
-              const SizedBox(height: 10),
-              LinearProgressIndicator(value: progress),
-              const SizedBox(height: 12),
-              Text('Dinle ve doğru cümleyi seç.', style: TextStyle(color: Colors.white.withOpacity(0.82), fontWeight: FontWeight.w700, fontSize: 18)),
-            ]),
+          const SizedBox(height: 10),
+          _buildProgressBar(),
+          const SizedBox(height: 30),
+          _buildCard(),
+          const SizedBox(height: 20),
+          Text(
+            '${_index + 1}/${_items.length}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 14),
-          AppCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Türkçe anlam', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24)),
-              const SizedBox(height: 8),
-              Text(_q.exampleTr, style: TextStyle(color: Colors.white.withOpacity(0.76), fontWeight: FontWeight.w700, fontSize: 18)),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(onPressed: _play, icon: const Icon(Icons.volume_up_rounded), label: Text(_playedOnce ? 'Tekrar dinle' : 'Dinle')),
-            ]),
-          ),
-          const SizedBox(height: 14),
-          ...List.generate(_q.practiceOptions.length, (idx) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: AppOptionTile(
-                  title: _q.practiceOptions[idx],
-                  selected: _selected == idx,
-                  correct: _checked && idx == _q.correctIndex,
-                  wrong: _checked && _selected == idx && idx != _q.correctIndex,
-                  onTap: _checked ? null : () => setState(() => _selected = idx),
-                ),
-              )),
-          if (_checked) ...[
-            const SizedBox(height: 4),
-            Text(_selected == _q.correctIndex ? '✅ Doğru' : '❌ Yanlış', style: TextStyle(fontWeight: FontWeight.w900, color: _selected == _q.correctIndex ? AppTheme.success : AppTheme.danger, fontSize: 18)),
-          ],
-          const SizedBox(height: 90),
         ],
       ),
     );
